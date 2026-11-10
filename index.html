@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Divide gastos compartidos y calcula quién debe pagar a quién. Funciona offline y tus datos no salen de tu navegador.">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+    <title>Divisor de Gastos</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_MX">
+    <meta property="og:title" content="Divisor de Gastos">
+    <meta property="og:description" content="Divide gastos compartidos sin dramas. Funciona offline y todo queda en tu dispositivo.">
+    <meta property="og:image" content="icons/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Divisor de Gastos">
+    <meta name="twitter:description" content="Divide gastos compartidos sin dramas. Funciona offline y todo queda en tu dispositivo.">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+
+    <header class="site-header">
+        <div>
+            <h1>💸 Divisor de Gastos</h1>
+            <p class="subtitle">Divide cuentas sin dramas. Todo queda en tu dispositivo.</p>
+        </div>
+        <div class="header-actions">
+            <span id="offline-badge" class="badge" hidden>Sin conexión</span>
+            <button id="install-btn" class="ghost" type="button" hidden>Instalar app</button>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="card toolbar no-print" aria-label="Grupo y moneda">
+            <div class="field">
+                <label for="group-select">Grupo</label>
+                <select id="group-select"></select>
+            </div>
+            <div class="field">
+                <label for="currency">Moneda</label>
+                <select id="currency"></select>
+                <p class="hint">Solo cambia el formato; no convierte montos.</p>
+            </div>
+            <div class="toolbar-actions">
+                <button id="group-new" class="ghost" type="button">Nuevo grupo</button>
+                <button id="group-rename" class="ghost" type="button">Renombrar</button>
+                <button id="group-delete" class="ghost danger-ghost" type="button">Eliminar</button>
+            </div>
+        </section>
+
+        <section class="card summary" aria-label="Resumen del grupo">
+            <div class="stat">
+                <span class="stat-label">Total</span>
+                <strong id="summary-total">—</strong>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Gastos</span>
+                <strong id="summary-count">0</strong>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Personas</span>
+                <strong id="summary-people">0</strong>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>1. Personas</h2>
+                <p class="hint">Agrega al menos 2 para dividir.</p>
+            </div>
+            <form id="person-form" novalidate>
+                <div class="field">
+                    <label for="person-name">Nombre</label>
+                    <input type="text" id="person-name" placeholder="Ej. Ana" maxlength="60" autocomplete="off"
+                        required>
+                </div>
+                <button type="submit">Agregar</button>
+            </form>
+            <p class="error" id="person-error" role="alert" hidden></p>
+            <ul id="people-list" class="list"></ul>
+        </section>
+
+        <section class="card">
+            <h2>2. Gastos</h2>
+            <form id="expense-form" novalidate>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="expense-desc">Descripción</label>
+                        <input type="text" id="expense-desc" placeholder="Cena, taxi…" maxlength="100"
+                            autocomplete="off" required>
+                    </div>
+                    <div class="field">
+                        <label for="expense-amount">Monto</label>
+                        <input type="text" id="expense-amount" placeholder="0.00" inputmode="decimal"
+                            autocomplete="off" required>
+                    </div>
+                    <div class="field">
+                        <label for="expense-paidby">Pagó</label>
+                        <select id="expense-paidby"></select>
+                    </div>
+                </div>
+
+                <fieldset>
+                    <legend>Participantes y reparto</legend>
+                    <div class="segmented" role="radiogroup" aria-label="Modo de reparto">
+                        <label><input type="radio" name="split-mode" value="equal" checked><span>Partes
+                                iguales</span></label>
+                        <label><input type="radio" name="split-mode" value="amount"><span>Montos</span></label>
+                        <label><input type="radio" name="split-mode" value="percent"><span>Porcentajes</span></label>
+                    </div>
+                    <ul id="participant-list" class="participant-list"></ul>
+                </fieldset>
+
+                <p id="split-preview" class="hint split-preview" role="status"></p>
+                <p class="error" id="expense-error" role="alert" hidden></p>
+
+                <div class="form-actions">
+                    <button type="submit" id="expense-submit">Agregar gasto</button>
+                    <button type="button" id="expense-cancel" class="ghost" hidden>Cancelar edición</button>
+                </div>
+            </form>
+            <ul id="expenses-list" class="list"></ul>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>3. Resultado</h2>
+                <button id="share-btn" class="ghost no-print" type="button">Compartir liquidación</button>
+            </div>
+            <div id="balances" aria-live="polite"></div>
+            <h3 id="settlements-title">Liquidación (quién paga a quién)</h3>
+            <ul id="settlements" class="list" aria-live="polite"></ul>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>Pagos registrados</h2>
+                <p class="hint">Marca una liquidación como pagada para dejar constancia.</p>
+            </div>
+            <ul id="payments-list" class="list"></ul>
+        </section>
+
+        <section class="card no-print">
+            <h2>Datos</h2>
+            <p class="hint">Tus datos viven en este navegador. Exporta un respaldo antes de limpiarlo o cambiar de
+                dispositivo.</p>
+            <div class="button-grid">
+                <button id="export-json" class="ghost" type="button">Exportar JSON</button>
+                <button id="export-csv" class="ghost" type="button">Exportar CSV</button>
+                <button id="import-btn" class="ghost" type="button">Importar JSON</button>
+                <button id="print-btn" class="ghost" type="button">Imprimir / PDF</button>
+                <button id="reset-btn" class="danger" type="button">Reiniciar grupo</button>
+            </div>
+            <input type="file" id="import-file" accept="application/json,.json" aria-label="Archivo de respaldo JSON" hidden>
+        </section>
+    </main>
+
+    <footer>
+        <small>
+            Hecho por <a href="https://neffex010.github.io" target="_blank" rel="noopener noreferrer">Neffex010</a>
+            · Sin servidor: tus datos no salen de tu navegador.
+        </small>
+    </footer>
+
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+        <form method="dialog" id="confirm-form">
+            <h2 id="confirm-title"></h2>
+            <p id="confirm-message"></p>
+            <div class="dialog-actions">
+                <button type="button" class="ghost" data-close-dialog>Cancelar</button>
+                <button value="ok" id="confirm-ok">Confirmar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="prompt-dialog" aria-labelledby="prompt-title">
+        <form method="dialog" id="prompt-form" novalidate>
+            <h2 id="prompt-title"></h2>
+            <div class="field">
+                <label for="prompt-input" id="prompt-label"></label>
+                <input type="text" id="prompt-input" maxlength="60" autocomplete="off">
+            </div>
+            <p class="error" id="prompt-error" role="alert" hidden></p>
+            <div class="dialog-actions">
+                <button type="button" class="ghost" data-close-dialog>Cancelar</button>
+                <button value="ok" id="prompt-ok">Guardar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="person-delete-dialog" aria-labelledby="pd-title">
+        <form method="dialog" id="person-delete-form">
+            <h2 id="pd-title"></h2>
+            <p id="pd-message"></p>
+            <fieldset id="pd-options">
+                <legend>¿Qué hacemos con sus gastos?</legend>
+                <label class="radio-line">
+                    <input type="radio" name="pd-mode" value="reassign" checked>
+                    <span>Reasignar sus pagos y repartir su parte entre el resto</span>
+                </label>
+                <div class="field">
+                    <label for="pd-reassign">Reasignar sus pagos a</label>
+                    <select id="pd-reassign"></select>
+                </div>
+                <label class="radio-line">
+                    <input type="radio" name="pd-mode" value="delete">
+                    <span>Eliminar también los gastos donde participa</span>
+                </label>
+            </fieldset>
+            <p class="error" id="pd-error" role="alert" hidden></p>
+            <div class="dialog-actions">
+                <button type="button" class="ghost" data-close-dialog>Cancelar</button>
+                <button value="ok" class="danger">Eliminar persona</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="text-dialog" aria-labelledby="text-title">
+        <form method="dialog">
+            <h2 id="text-title"></h2>
+            <p class="hint">Copia el texto y compártelo donde quieras.</p>
+            <textarea id="text-output" rows="9" readonly aria-label="Liquidación para compartir"></textarea>
+            <div class="dialog-actions">
+                <button type="button" class="ghost" data-close-dialog>Cerrar</button>
+                <button type="button" id="text-copy">Copiar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+        <span id="toast-message"></span>
+        <button type="button" id="toast-action" class="toast-action" hidden>Deshacer</button>
+        <button type="button" id="toast-close" class="toast-close" aria-label="Cerrar aviso">✕</button>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

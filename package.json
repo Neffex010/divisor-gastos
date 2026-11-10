@@ -1,0 +1,13 @@
+{
+  "name": "divisor-gastos",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Divisor de gastos compartidos, offline y sin servidor.",
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check.mjs",
+    "verify": "npm run check && npm test",
+    "serve": "python -m http.server 8080"
+  }
+}
