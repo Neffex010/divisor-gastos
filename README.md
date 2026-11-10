@@ -1,5 +1,7 @@
 # 💸 Divisor de Gastos
 
+**[Abrir la app →](https://neffex010.github.io/divisor-gastos/)**
+
 Aplicación web para dividir gastos compartidos y calcular quién debe pagar a quién.
 Funciona sin servidor, sin cuentas y sin conexión: todos los datos viven en el
 `localStorage` de tu navegador.
