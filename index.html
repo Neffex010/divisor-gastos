@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#12120e">
     <meta name="color-scheme" content="light dark">
     <meta name="description" content="Divide gastos compartidos y calcula quién debe pagar a quién. Funciona offline y tus datos no salen de tu navegador.">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
@@ -30,11 +30,13 @@
     <a class="skip-link" href="#main">Saltar al contenido</a>
 
     <header class="site-header">
-        <div>
-            <h1>💸 Divisor de Gastos</h1>
-            <p class="subtitle">Divide cuentas sin dramas. Todo queda en tu dispositivo.</p>
+        <div class="brand">
+            <p class="kicker">Offline · Sin cuentas · Sin servidor</p>
+            <h1 class="wordmark">Divisor<br><span>de gastos</span></h1>
+            <p class="subtitle">Reparte cuentas sin dramas. Todo queda en tu dispositivo.</p>
         </div>
         <div class="header-actions">
+            <span class="sticker" aria-hidden="true">0%<br>servidor</span>
             <span id="offline-badge" class="badge" hidden>Sin conexión</span>
             <button id="install-btn" class="ghost" type="button" hidden>Instalar app</button>
         </div>
@@ -75,7 +77,7 @@
 
         <section class="card">
             <div class="card-head">
-                <h2>1. Personas</h2>
+                <h2>Personas</h2>
                 <p class="hint">Agrega al menos 2 para dividir.</p>
             </div>
             <form id="person-form" novalidate>
@@ -91,7 +93,7 @@
         </section>
 
         <section class="card">
-            <h2>2. Gastos</h2>
+            <h2>Gastos</h2>
             <form id="expense-form" novalidate>
                 <div class="form-grid">
                     <div class="field">
@@ -134,7 +136,7 @@
 
         <section class="card">
             <div class="card-head">
-                <h2>3. Resultado</h2>
+                <h2>Resultado</h2>
                 <button id="share-btn" class="ghost no-print" type="button">Compartir liquidación</button>
             </div>
             <div id="balances" aria-live="polite"></div>

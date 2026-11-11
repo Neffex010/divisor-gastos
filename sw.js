@@ -1,5 +1,5 @@
 /* Service Worker: cache propio por versión, sin tocar otras apps del mismo origen. */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `divisor-gastos-${VERSION}`;
 const CACHE_PREFIX = 'divisor-gastos-';
 
